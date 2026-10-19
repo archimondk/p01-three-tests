@@ -1,0 +1,5 @@
+# 运行产物不纳入版本库；manifest.json 记录输入与代码哈希，可据此复现
+p01_three_tests/outputs/
+__pycache__/
+*.pyc
+.pytest_cache/
