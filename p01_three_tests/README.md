@@ -1,51 +1,73 @@
-# P01 三重检验：冻结分析流程
+# P01 three-test screen: frozen analysis pipeline
 
-用一条流程，把旧版的 `audit.py`、`p1`、`p5`、`p7`–`p10` 合并起来。所有参数集中在 `config.py`，规则写在 `PROTOCOL.md`。
+One pipeline that merges the earlier script set (`audit.py`, `p1`, `p5`, `p7`–`p10`) into a
+single flow. All parameters live in `config.py`; the rules are in `PROTOCOL.md`.
 
-## 环境
+The pipeline applies three tests — analytic availability, reliability and statistical
+comparability — to HAI surveillance indicators, and decides whether each indicator may be
+used for single-quarter inter-hospital comparison.
+
+## Requirements
 
 - Python ≥ 3.10
-- 依赖：pandas、numpy、scipy、matplotlib、openpyxl、statsmodels、pytest
+- pandas, numpy, scipy, matplotlib, openpyxl, statsmodels, pytest
 
-## 用法
+## Running
 
 ```bash
-# 1. 测试（需要 statsmodels，否则示范模型的测试会被跳过）
+# 1. Tests (45; the demonstration-model and MixedLM cross-check cases are
+#    skipped when statsmodels is unavailable)
 python -m pytest tests
 
-# 2. 试跑（结果不进稿件）
-python run.py --raw 数据目录 --B 200
+# 2. Trial run — results must not enter the manuscript
+python run.py --raw <data directory> --B 200
 
-# 3. 正式运行
-python run.py --raw 数据目录 [--code-register 四川中医医院代码表对照表.xlsx] [--custodian-flags 质控名单.csv]
+# 3. Formal run
+python run.py --raw <data directory> \
+              [--code-register code_register.xlsx] \
+              [--custodian-flags custodian_flags.csv]
 
-# 4. 新旧提取比对
-python revision_audit.py --old 旧数据目录 --new 新数据目录
+# 4. Compare two extracts
+python revision_audit.py --old <old data directory> --new <new data directory>
 ```
 
-数据目录里放平台导出的季度申报表，文件名形如 `t_25_S_1.csv`，表示 2025 年第 1 季度。
+The data directory holds the platform's quarterly returns, one file per quarter, named
+`t_YY_S_Q.csv` (`t_25_S_1.csv` = 2025 Q1). Every file must match the pattern
+`^t_(\d{2})_S_([1-4])\.csv$`; files that do not are silently ignored, so check that each
+quarter is present exactly once before running. A file that fails the required-field
+check stops the run rather than being merged with missing columns.
 
-每次运行会在 `outputs/run_时间戳/` 下生成以下内容：
+`--code-register` points to the institutional code register (column 2 holds the hospital
+code) used to count institutions activated on the platform. `--custodian-flags` takes a
+CSV or Excel file with columns `ID, period, indicator, flag` (`flag` is `good` or `bad`;
+`indicator` is an indicator key or `composite`).
 
-| 输出 | 内容 |
+## Outputs
+
+Each run writes to `outputs/run_<timestamp>/`:
+
+| Output | Contents |
 |---|---|
-| `tables/*.csv` 与 `results.xlsx` | Table 1–5、S1–S10，以及过程表 |
-| `figures/` | Figure 1–4、S1–S3，PNG 与 TIFF 两种格式，300 dpi |
-| `numbers.json` | 正文引用的全部数字，必须以它为唯一来源 |
-| `manifest.json` | 输入文件哈希、代码哈希、git tag、软件版本、自助次数与种子 |
+| `tables/*.csv` and `results.xlsx` | Tables 1–5 and S1–S12, plus process tables (X_*) |
+| `figures/` | Figures 1–4 and S1–S4, as PNG and TIFF, 300 dpi |
+| `numbers.json` | Every number quoted in the manuscript; the only permitted source |
+| `manifest.json` | Input file hashes, code hashes, git tag, software versions, bootstrap count and seed |
 
-## 文件
+Run outputs are excluded from version control; `manifest.json` records the input and code
+hashes needed to reproduce a run.
 
-| 文件 | 作用 |
+## Files
+
+| File | Role |
 |---|---|
-| `config.py` | 冻结参数。冻结后只允许修改 PATHS、CUSTODIAN、COLUMN_ALIASES |
-| `data.py` | 读入、校验、清洗、上报状态编码 |
-| `core.py` | REML ICC、整群自助、Spearman–Brown、判定规则、过度离散、DL 估计（不依赖 statsmodels） |
-| `analysis.py` | 三重检验、Table 1–3、S1–S9、敏感性分析 |
-| `models.py` | 示范分析与 MixedLM 交叉核对（需要 statsmodels） |
-| `consequence.py` | 后果分析：名次不确定区间、粗率排名与校正方法的一致性、朴素排名、质控名单比对 |
-| `figures.py` | 图件 |
-| `run.py` | 入口 |
-| `revision_audit.py` | 新旧提取比对 |
-| `tests/` | 模拟数据生成器与 45 项测试 |
-| `docs/v16_code_review.md` | 对 v1.6 代码的审读记录 |
+| `config.py` | Frozen parameters. After the freeze only `PATHS`, `CUSTODIAN` and `COLUMN_ALIASES` may be changed; any other change is a protocol deviation and requires a new tag. |
+| `data.py` | Reading, validation, cleaning, reporting-status coding |
+| `core.py` | REML ICC, cluster bootstrap, Spearman–Brown, verdict rules, overdispersion, DerSimonian–Laird estimator (no statsmodels required) |
+| `analysis.py` | The three tests, Tables 1–3 and S1–S9, sensitivity analyses |
+| `models.py` | Demonstration models and the MixedLM cross-check (requires statsmodels) |
+| `consequence.py` | Consequence analysis: rank uncertainty intervals, agreement between crude ranking and adjusted methods, naive ranking, comparison with a quality-control list |
+| `figures.py` | Figures |
+| `run.py` | Entry point |
+| `revision_audit.py` | Comparison of two extracts |
+| `tests/` | Synthetic data generator and 45 tests |
+| `docs/v16_code_review.md` | Code review of the pre-freeze script set |
