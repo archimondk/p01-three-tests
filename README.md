@@ -17,7 +17,6 @@ and are not publicly available.
 | `p01_three_tests/PROTOCOL.md` | Protocol: the decisions D1–D7, the data and cleaning rules, the three tests, the combination rules, the consequence analysis, and the record of deviations. |
 | `FREEZE_CHECK_v2.0.md` | Pre-freeze verification: test results, comparison against the previous manuscript version, D1–D7 evidence, the post-receipt comparisons, and the data delivery log with input hashes. |
 | `v16_code_review.md`, `p01_three_tests/docs/v16_code_review.md` | Code review of the earlier, pre-freeze script set. |
-| `p01_three_tests_freeze_v2.0.zip` | **The original package as delivered before the freeze, unmodified.** Superseded: it does not contain the C01b cleaning rule or the two fixes described in `FREEZE_CHECK_v2.0.md` §2. Running it will not reproduce the reported results. Use the working tree. |
 | `PROTOCOL.md` | A copy of the protocol, kept in sync with `p01_three_tests/PROTOCOL.md`. |
 
 ## Freeze
@@ -37,6 +36,16 @@ formal run (updated extract) gave identical results for every indicator — anal
 availability, ICC with bootstrap intervals, the three test verdicts, the overall verdicts,
 event counts, overdispersion factors and precision thresholds. Details in
 `FREEZE_CHECK_v2.0.md`.
+
+## The pre-freeze package
+
+Tag `p01-three-tests-freeze-v2.0` contains `p01_three_tests_freeze_v2.0.zip`, the original
+package as delivered to the study team before the freeze, kept unmodified as a record of
+what was handed over. It is **superseded and must not be used to reproduce the reported
+results**: it predates the C01b cleaning rule and the two code fixes described in
+`FREEZE_CHECK_v2.0.md` §2, and it reports nothing about the data that arrived afterwards.
+
+The zip is not part of the current tree. The working tree is the version to use.
 
 ## Requirements
 

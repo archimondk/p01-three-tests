@@ -138,9 +138,9 @@ def clean(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
     blank((df[pdays] > 0) & (df[pdays] < C.MIN_PATIENT_DAYS), [pdays], "C04",
           f"同期住院天数 <{C.MIN_PATIENT_DAYS}，分母异常")
 
-    # 合理性上限：每百床感控专职人员数。旧数据里 H204（2025Q2）与 H050（2026Q2）把床位数
-    # 抄进了人员数字段（220/220、400/400），而 C01 只拦 <=0。一条这样的记录足以把医院间
-    # 标准差从 0.315 抬到 3.901，示范分析的"每标准差 IRR"随之失去意义，因此按上限置缺失。
+    # 合理性上限：每百床感控专职人员数。旧数据中有记录把床位数抄进了人员数字段
+    # （人员数与床位数相等），而 C01 只拦 <=0。一条这样的记录足以把医院间标准差
+    # 抬一个量级，示范分析的"每标准差 IRR"随之失去意义，因此按上限置缺失。
     staff_rate = df[staff] / df[beds] * 100
     blank(pd.Series(staff_rate > C.STAFF_PER100_CEILING, index=df.index), [staff], "C01b",
           f"每百床感控专职人员数 > {C.STAFF_PER100_CEILING}，疑人员数与床位数录错")

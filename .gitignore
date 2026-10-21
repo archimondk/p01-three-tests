@@ -3,3 +3,6 @@ p01_three_tests/outputs/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# 冻结前的原始交付包：不在当前树中发布，仅保留在本地
+p01_three_tests_freeze_v2.0.zip
